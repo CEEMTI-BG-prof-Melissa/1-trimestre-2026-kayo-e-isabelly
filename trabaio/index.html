@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Horários Escolares</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header class="cabecalho">
+    <div>
+        <h1>Horários Escolares</h1>
+        <p>Organização inteligente de aulas</p>
+    </div>
+
+    <div class="botoes-header">
+        <button id="btnPublico" class="botao secundario">
+            Visualizar horários
+        </button>
+
+        <button id="btnLogin" class="botao">
+            Gerenciador
+        </button>
+    </div>
+</header>
+
+<main class="container">
+
+    <!-- ÁREA PÚBLICA -->
+    <section id="areaPublica">
+
+        <div class="titulo-area">
+            <div>
+                <h2>Horários das turmas</h2>
+                <p>Consulte a distribuição das aulas da semana.</p>
+            </div>
+
+            <div>
+                <label for="filtroTurma">Turma:</label>
+                <select id="filtroTurma">
+                    <option value="1°|01-EMI ANC">1°|01-EMI ANC</option>
+                    <option value="1°|02-EMI ANC">1°|02-EMI ANC</option>
+                    <option value="1°|01-EMI IPI">1°|01-EMI IPI</option>
+                    <option value="1°|02-EMI IPI">1°|02-EMI IPI</option>
+                    <option value="1°|01-EMI RDC">1°|01-EMI RDC</option>
+                    <option value="2°|01-EMI MCN">2°|01-EMI MCN</option>
+                    <option value="2°|01-EMI ANC">2°|01-EMI ANC</option>
+                    <option value="2°|02-EMI ANC">2°|02-EMI ANC</option>
+                    <option value="2°|01-EMI IPI">2°|01-EMI IPI</option>
+                    <option value="2°|02-EMI IPI">2°|02-EMI IPI</option>
+                    <option value="2°|02-EMI MSI">2°|02-EMI MSI</option>
+                    <option value="3°|01-EMI ESP">3°|01-EMI ESP</option>
+                    <option value="3°|01-EMI ANC">3°|01-EMI ANC</option>
+                    <option value="3°|01-EMI IPI">3°|01-EMI IPI</option>
+                    <option value="3°|02-EMI IPI">3°|02-EMI IPI</option>
+                    <option value="3°|01-EMI MSI">3°|01-EMI MSI</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="legenda">
+            <span class="legenda-item">
+                <span class="bolinha azul"></span>
+                Horário preenchido
+            </span>
+
+            <span class="legenda-item">
+                <span class="bolinha verde"></span>
+                Horário disponível
+            </span>
+        </div>
+
+        <div class="grade-container">
+            <table id="tabelaPublica" class="grade"></table>
+        </div>
+
+        <p class="aviso">
+            Os horários são atualizados conforme as alterações
+            realizadas pelo gerenciador neste navegador.
+        </p>
+
+    </section>
+
+    <!-- ÁREA DE LOGIN -->
+    <section id="areaLogin" class="painel-login escondido">
+
+        <div class="cartao-login">
+
+            <h2>Acesso do gerenciador</h2>
+            <p>Entre para organizar os horários escolares.</p>
+
+            <form id="formLogin">
+
+                <label for="usuario">Usuário</label>
+                <input
+                    type="text"
+                    id="usuario"
+                    placeholder="Digite seu usuário"
+                    required
+                >
+
+                <label for="senha">Senha</label>
+                <input
+                    type="password"
+                    id="senha"
+                    placeholder="Digite sua senha"
+                    required
+                >
+
+                <button type="submit" class="botao">
+                    Entrar
+                </button>
+
+                <p id="mensagemLogin" class="mensagem"></p>
+
+            </form>
+
+            <button id="voltarPublico" class="botao texto">
+                Voltar para visualização
+            </button>
+
+        </div>
+
+    </section>
+
+    <!-- ÁREA DO GERENCIADOR -->
+    <section id="areaGerenciador" class="escondido">
+
+        <div class="titulo-area">
+            <div>
+                <h2>Painel do gerenciador</h2>
+                <p>Organize as aulas de cada turma.</p>
+            </div>
+
+            <button id="btnSair" class="botao perigo">
+                Sair
+            </button>
+        </div>
+
+        <div class="painel-controle">
+
+
+            <div>
+                <label for="turmaGerenciador">Turma</label>
+                <select id="turmaGerenciador">
+                    <option value="1°|01-EMI ANC">1°|01-EMI ANC</option>
+                    <option value="1°|02-EMI ANC">1°|02-EMI ANC</option>
+                    <option value="1°|01-EMI IPI">1°|01-EMI IPI</option>
+                    <option value="1°|02-EMI IPI">1°|02-EMI IPI</option>
+                    <option value="1°|01-EMI RDC">1°|01-EMI RDC</option>
+                    <option value="2°|01-EMI MCN">2°|01-EMI MCN</option>
+                    <option value="2°|01-EMI ANC">2°|01-EMI ANC</option>
+                    <option value="2°|02-EMI ANC">2°|02-EMI ANC</option>
+                    <option value="2°|01-EMI IPI">2°|01-EMI IPI</option>
+                    <option value="2°|02-EMI IPI">2°|02-EMI IPI</option>
+                    <option value="2°|02-EMI MSI">2°|02-EMI MSI</option>
+                    <option value="3°|01-EMI ESP">3°|01-EMI ESP</option>
+                    <option value="3°|01-EMI ANC">3°|01-EMI ANC</option>
+                    <option value="3°|01-EMI IPI">3°|01-EMI IPI</option>
+                    <option value="3°|02-EMI IPI">3°|02-EMI IPI</option>
+                    <option value="3°|01-EMI MSI">3°|01-EMI MSI</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="diaGerenciador">Dia da semana</label>
+                <select id="diaGerenciador">
+                    <option value="0">Segunda-feira</option>
+                    <option value="1">Terça-feira</option>
+                    <option value="2">Quarta-feira</option>
+                    <option value="3">Quinta-feira</option>
+                    <option value="4">Sexta-feira</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="aulaGerenciador">Aula</label>
+                <select id="aulaGerenciador">
+                    <option value="0">1ª aula</option>
+                    <option value="1">2ª aula</option>
+                    <option value="2">3ª aula</option>
+                    <option value="3">4ª aula</option>
+                    <option value="4">5ª aula</option>
+                    <option value="5">6ª aula</option>
+                    <option value="6">7ª aula</option>
+                    <option value="7">8ª aula</option>
+                    <option value="8">9ª aula</option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="grade-container">
+            <table id="tabelaGerenciador" class="grade"></table>
+        </div>
+
+        <div class="editor">
+
+            <div class="editor-cabecalho">
+                <div>
+                    <h3 id="tituloEditor">Editar aula</h3>
+                    <p>Selecione uma célula na grade para editar.</p>
+                </div>
+            </div>
+
+            <form id="formAula">
+
+                <div class="campos">
+
+                    <div>
+                        <label for="materia">Matéria</label>
+                        <input
+                            type="text"
+                            id="materia"
+                            placeholder="Ex.: Matemática"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label for="professor">Professor</label>
+                        <input
+                            type="text"
+                            id="professor"
+                            placeholder="Nome do professor"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label for="sala">Sala</label>
+                        <input
+                            type="text"
+                            id="sala"
+                            placeholder="Ex.: Sala 05"
+                            required
+                        >
+                    </div>
+
+                </div>
+
+                <div class="botoes-editor">
+
+                    <button type="submit" class="botao">
+                        Salvar aula
+                    </button>
+
+                    <button
+                        type="button"
+                        id="btnLimpar"
+                        class="botao perigo"
+                    >
+                        Limpar horário
+                    </button>
+
+                </div>
+
+                <p id="mensagemEditor" class="mensagem"></p>
+
+            </form>
+
+        </div>
+
+        <div class="rodape-gerenciador">
+            <button id="btnExportar" class="botao secundario">
+                Exportar horários
+            </button>
+
+            <button id="btnLimparTudo" class="botao perigo">
+                Apagar todos os horários
+            </button>
+        </div>
+
+    </section>
+
+</main>
+
+<footer>
+    <p>Organização de Horários Escolares</p>
+</footer>
+
+<script src="script.js"></script>
+
+</body>
+</html>
