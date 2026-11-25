@@ -142,6 +142,97 @@
         </div>
 
         <div class="painel-controle">
+            <!-- PAINEL DE DISPONIBILIDADE -->
+<section class="disponibilidade">
+
+    <div class="disponibilidade-topo">
+
+        <div>
+            <span class="disponibilidade-etiqueta">
+                ORGANIZAÇÃO DE AULAS
+            </span>
+
+            <h3>Disponibilidade</h3>
+
+            <p id="tituloDisponibilidade">
+                Selecione um horário para consultar.
+            </p>
+        </div>
+
+        <div class="disponibilidade-icone">
+            <span>▦</span>
+        </div>
+
+    </div>
+
+    <div class="disponibilidade-listas">
+
+        <!-- PROFESSORES -->
+        <div class="card-disponibilidade">
+
+            <div class="card-disponibilidade-topo">
+
+                <div class="icone-card professores">
+                    <span>♙</span>
+                </div>
+
+                <div class="card-titulo">
+                    <h4>Professores</h4>
+                    <p>Disponíveis neste horário</p>
+                </div>
+
+                <span
+                    id="contadorProfessores"
+                    class="contador"
+                >
+                    0
+                </span>
+
+            </div>
+
+            <div class="linha-divisoria"></div>
+
+            <ul id="listaProfessores"></ul>
+
+        </div>
+
+        <!-- SALAS -->
+        <div class="card-disponibilidade">
+
+            <div class="card-disponibilidade-topo">
+
+                <div class="icone-card salas">
+                    <span>▣</span>
+                </div>
+
+                <div class="card-titulo">
+                    <h4>Salas</h4>
+                    <p>Disponíveis neste horário</p>
+                </div>
+
+                <span
+                    id="contadorSalas"
+                    class="contador"
+                >
+                    0
+                </span>
+
+            </div>
+
+            <div class="linha-divisoria"></div>
+
+            <ul id="listaSalas"></ul>
+
+        </div>
+
+    </div>
+
+    <div class="disponibilidade-rodape">
+        <span class="status-ponto"></span>
+        <p>Disponibilidade atualizada automaticamente</p>
+    </div>
+
+</section>
 
 
             <div>
@@ -165,7 +256,50 @@
                     <option value="3°|01-EMI MSI">3°|01-EMI MSI</option>
                 </select>
             </div>
-
+            <!-- CADASTRO DE PROFESSORES -->
+            <section class="cadastro-professores">
+            
+                <div class="cadastro-topo">
+                    <div>
+                        <h3>Professores cadastrados</h3>
+                        <p>Cadastre ou remova professores do sistema.</p>
+                    </div>
+            
+                    <span id="totalProfessores" class="contador">
+                        0
+                    </span>
+                </div>
+            
+                <form id="formProfessor" class="form-professor">
+                    <input
+                        type="text"
+                        id="nomeProfessor"
+                        placeholder="Nome completo do professor"
+                        required
+                        maxlength="100"
+                    >
+            
+                    <button type="submit" class="botao">
+                        + Cadastrar
+                    </button>
+                </form>
+            
+                <p id="mensagemProfessor" class="mensagem"></p>
+            
+                <div class="lista-professores-container">
+                    <table class="tabela-professores">
+                        <thead>
+                            <tr>
+                                <th>Professor</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+            
+                        <tbody id="listaCadastroProfessores"></tbody>
+                    </table>
+                </div>
+            
+            </section>
             <div>
                 <label for="diaGerenciador">Dia da semana</label>
                 <select id="diaGerenciador">
