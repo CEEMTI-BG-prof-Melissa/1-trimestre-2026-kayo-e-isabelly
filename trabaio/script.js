@@ -625,31 +625,91 @@ document.getElementById("btnLimpar").addEventListener(
 );
 
 // =====================================
-// EXPORTAR HORÁRIOS
+// EXPORTAR HORÁRIOS PARA EXCEL
 // =====================================
 
-document.getElementById("btnExportar").addEventListener(
-    "click",
-    function() {
-        if (!administradorLogado) return;
+document.getElementById("btnExportar").addEventListener("click", function() {
+    if (!administradorLogado) return;
 
-        const arquivo = new Blob(
-            [JSON.stringify(horarios, null, 2)],
-            { type: "application/json" }
-        );
-
-        const url = URL.createObjectURL(arquivo);
-
-        const link = document.createElement("a");
-
-        link.href = url;
-        link.download = "horarios-escolares.json";
-
-        link.click();
-
-        URL.revokeObjectURL(url);
+    if (typeof XLSX === "undefined") {
+        alert("Não foi possível carregar a biblioteca de planilhas. Verifique sua conexão com a internet.");
+        return;
     }
-);
+
+    // Cria uma nova planilha
+    const planilha = XLSX.utils.book_new();
+
+    // Cria uma aba para cada turma
+    TURMAS.forEach(turma => {
+        const dados = [];
+
+        // Cabeçalho: horários e dias da semana
+        dados.push(["Aula / Horário", ...DIAS]);
+
+        // Uma linha para cada aula
+        HORARIOS.forEach((horario, numeroAula) => {
+            const linha = [
+                `${numeroAula + 1}ª aula\n${horario}`
+            ];
+
+            // Preenche as colunas de segunda a sexta
+            DIAS.forEach((dia, numeroDia) => {
+                const aula = obterAula(
+                    turma,
+                    numeroDia,
+                    numeroAula
+                );
+
+                if (aula) {
+                    linha.push(
+                        `${aula.materia}\n` +
+                        `Professor: ${aula.professor}\n` +
+                        `Sala: ${aula.sala}`
+                    );
+                } else {
+                    linha.push("Disponível");
+                }
+            });
+
+            dados.push(linha);
+        });
+
+        // Converte os dados em uma planilha
+        const folha = XLSX.utils.aoa_to_sheet(dados);
+
+        // Ajusta a largura das colunas
+        folha["!cols"] = [
+            { wch: 22 },
+            { wch: 30 },
+            { wch: 30 },
+            { wch: 30 },
+            { wch: 30 },
+            { wch: 30 }
+        ];
+
+        // Ajusta a altura das linhas para caberem as informações
+        folha["!rows"] = dados.map((linha, indice) => ({
+            hpt: indice === 0 ? 25 : 55
+        }));
+
+        // Limita o nome da aba a 31 caracteres
+        const nomeAba = turma
+            .replace(/[\\/?*[\]:]/g, "")
+            .substring(0, 31);
+
+        XLSX.utils.book_append_sheet(
+            planilha,
+            folha,
+            nomeAba
+        );
+    });
+
+    // Gera e baixa o arquivo Excel
+    XLSX.writeFile(
+        planilha,
+        "horarios-escolares.xlsx"
+    );
+});
 
 // =====================================
 // APAGAR TODOS OS HORÁRIOS
@@ -734,7 +794,6 @@ function atualizarDisponibilidade() {
     ).textContent =
         `${DIAS[dia]} | ${aula + 1}ª aula | ${HORARIOS[aula]}`;
 
-    // Atualiza as listas na tela
 // Atualiza as listas de disponibilidade
 preencherLista(
     "listaProfessores",
@@ -994,5 +1053,6 @@ function mostrarMensagemProfessor(texto, tipo) {
 // =====================================
 // INICIALIZAÇÃO
 // =====================================
+
 
 mostrarPublico();
