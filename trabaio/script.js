@@ -16,6 +16,64 @@ const HORARIOS = [
 
 const TURMAS = ["1°|01-EMI ANC", "1°|02-EMI ANC", "1°|01-EMI IPI", "1°|02-EMI IPI", "1°|01-EMI RDC", "2°|01-EMI MCN", "2°|01-EMI ANC", "2°|02-EMI ANC", "2°|01-EMI AIPI", "2°|02-EMI AIPI", "2°|02-EMI MSI", "3°|01-EMI ESP", "3°|01-EMI ANC", "3°|01-EMI IPI", "3°|02-EMI IPI", "3°|01-EMI MSI"];
 
+// =====================================
+// PROFESSORES CADASTRADOS
+// =====================================
+
+const CHAVE_PROFESSORES = "professoresEscolares";
+
+let PROFESSORES = carregarProfessores();
+
+function carregarProfessores() {
+    const dados = localStorage.getItem(CHAVE_PROFESSORES);
+
+    if (!dados) {
+        return [];
+    }
+
+    try {
+        const professores = JSON.parse(dados);
+
+        if (!Array.isArray(professores)) {
+            return [];
+        }
+
+        return professores.filter(
+            nome => typeof nome === "string"
+        );
+
+    } catch (erro) {
+        console.error("Erro ao carregar professores:", erro);
+        return [];
+    }
+}
+
+function salvarProfessores() {
+    localStorage.setItem(
+        CHAVE_PROFESSORES,
+        JSON.stringify(PROFESSORES)
+    );
+}
+
+const SALAS = [
+    "Sala 01",
+    "Sala 02",
+    "Sala 03",
+    "Sala 04",
+    "Sala 05",
+    "Sala 06",
+    "Sala 07",
+    "Sala 08",
+    "Sala 09",
+    "Sala 10",
+    "Sala 11",
+    "Sala 12",
+    "Sala 13",
+    "Lied 01",
+    "Lied 01",
+    "Laboratório de Biologia",
+    "Laboratório Analises Clinicas"
+];
 const CHAVE_STORAGE = "horariosEscolares";
 
 // =====================================
@@ -351,6 +409,10 @@ function renderizarGerenciador() {
         turma,
         "gerenciador"
     );
+
+    renderizarCadastroProfessores();
+
+    atualizarDisponibilidade();
 }
 
 turmaGerenciador.addEventListener(
@@ -617,7 +679,318 @@ document.getElementById("btnLimparTudo").addEventListener(
         );
     }
 );
+// =====================================
+// DISPONIBILIDADE DE PROFESSORES E SALAS
+// =====================================
 
+function atualizarDisponibilidade() {
+
+    const { turma, dia, aula } = celulaSelecionada;
+
+    const professoresOcupados = new Set();
+    const salasOcupadas = new Set();
+
+    // Verifica todas as turmas no mesmo dia e horário
+    TURMAS.forEach(outraTurma => {
+
+        const aulaAtual = obterAula(
+            outraTurma,
+            dia,
+            aula
+        );
+
+        if (!aulaAtual) return;
+
+        // Ignora a própria célula selecionada,
+        // permitindo editar uma aula já cadastrada
+        if (outraTurma === turma) return;
+
+        professoresOcupados.add(
+            normalizarTexto(aulaAtual.professor)
+        );
+
+        salasOcupadas.add(
+            normalizarTexto(aulaAtual.sala)
+        );
+    });
+
+    // Filtra os professores que não estão ocupados
+    const professoresDisponiveis = PROFESSORES.filter(
+        professor => !professoresOcupados.has(
+            normalizarTexto(professor)
+        )
+    );
+
+    // Filtra as salas que não estão ocupadas
+    const salasDisponiveis = SALAS.filter(
+        sala => !salasOcupadas.has(
+            normalizarTexto(sala)
+        )
+    );
+
+    // Atualiza o título do painel
+    document.getElementById(
+        "tituloDisponibilidade"
+    ).textContent =
+        `${DIAS[dia]} | ${aula + 1}ª aula | ${HORARIOS[aula]}`;
+
+    // Atualiza as listas na tela
+// Atualiza as listas de disponibilidade
+preencherLista(
+    "listaProfessores",
+    professoresDisponiveis,
+    "Nenhum professor disponível."
+);
+
+preencherLista(
+    "listaSalas",
+    salasDisponiveis,
+    "Nenhuma sala vazia."
+);
+
+// Atualiza os contadores
+document.getElementById("contadorProfessores").textContent =
+    professoresDisponiveis.length;
+
+document.getElementById("contadorSalas").textContent =
+    salasDisponiveis.length;
+}
+
+
+// Normaliza letras maiúsculas, minúsculas e espaços
+function normalizarTexto(texto) {
+    return texto
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ");
+}
+
+
+// Preenche uma lista HTML
+function preencherLista(id, itens, mensagemVazia) {
+
+    const lista = document.getElementById(id);
+
+    lista.innerHTML = "";
+
+    if (itens.length === 0) {
+
+        const item = document.createElement("li");
+
+        item.textContent = mensagemVazia;
+        item.className = "indisponivel";
+
+        lista.appendChild(item);
+
+        return;
+    }
+
+    itens.forEach(nome => {
+
+        const item = document.createElement("li");
+
+        item.textContent = nome;
+
+        lista.appendChild(item);
+    });
+}
+// =====================================
+// CADASTRO E EXCLUSÃO DE PROFESSORES
+// =====================================
+
+const formProfessor = document.getElementById("formProfessor");
+
+const nomeProfessorInput = document.getElementById("nomeProfessor");
+
+const listaCadastroProfessores = document.getElementById(
+    "listaCadastroProfessores"
+);
+
+const mensagemProfessor = document.getElementById(
+    "mensagemProfessor"
+);
+
+const totalProfessores = document.getElementById(
+    "totalProfessores"
+);
+
+
+// Cadastra um professor
+formProfessor.addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    if (!administradorLogado) {
+        mostrarMensagemProfessor(
+            "Entre como gerenciador para cadastrar professores.",
+            "erro"
+        );
+
+        return;
+    }
+
+    const nome = nomeProfessorInput.value.trim();
+
+    if (!nome) {
+        mostrarMensagemProfessor(
+            "Digite o nome do professor.",
+            "erro"
+        );
+
+        return;
+    }
+
+    // Impede nomes duplicados
+    const jaExiste = PROFESSORES.some(
+        professor =>
+            normalizarTexto(professor) === normalizarTexto(nome)
+    );
+
+    if (jaExiste) {
+        mostrarMensagemProfessor(
+            "Este professor já está cadastrado.",
+            "erro"
+        );
+
+        return;
+    }
+
+    PROFESSORES.push(nome);
+
+    PROFESSORES.sort((a, b) =>
+        a.localeCompare(b, "pt-BR")
+    );
+
+    salvarProfessores();
+
+    formProfessor.reset();
+
+    renderizarCadastroProfessores();
+    atualizarDisponibilidade();
+
+    mostrarMensagemProfessor(
+        "Professor cadastrado com sucesso!",
+        "sucesso"
+    );
+});
+
+
+// Exibe todos os professores cadastrados
+function renderizarCadastroProfessores() {
+    if (!listaCadastroProfessores) return;
+
+    listaCadastroProfessores.innerHTML = "";
+
+    totalProfessores.textContent = PROFESSORES.length;
+
+    if (PROFESSORES.length === 0) {
+        const linha = document.createElement("tr");
+        const celula = document.createElement("td");
+
+        celula.colSpan = 2;
+        celula.className = "sem-professores";
+        celula.textContent = "Nenhum professor cadastrado.";
+
+        linha.appendChild(celula);
+        listaCadastroProfessores.appendChild(linha);
+
+        return;
+    }
+
+    PROFESSORES.forEach(professor => {
+        const linha = document.createElement("tr");
+
+        const celulaNome = document.createElement("td");
+        celulaNome.textContent = professor;
+
+        const celulaAcoes = document.createElement("td");
+
+        const botaoExcluir = document.createElement("button");
+
+        botaoExcluir.type = "button";
+        botaoExcluir.className = "botao-excluir";
+        botaoExcluir.textContent = "Excluir";
+
+        botaoExcluir.addEventListener("click", function() {
+            excluirProfessor(professor);
+        });
+
+        celulaAcoes.appendChild(botaoExcluir);
+
+        linha.appendChild(celulaNome);
+        linha.appendChild(celulaAcoes);
+
+        listaCadastroProfessores.appendChild(linha);
+    });
+}
+
+
+// Exclui um professor do cadastro
+function excluirProfessor(nome) {
+    if (!administradorLogado) return;
+
+    const possuiAulas = verificarAulasDoProfessor(nome);
+
+    if (possuiAulas) {
+        mostrarMensagemProfessor(
+            "Este professor possui aulas cadastradas. " +
+            "Remova ou substitua essas aulas antes de excluí-lo.",
+            "erro"
+        );
+
+        return;
+    }
+
+    const confirmar = confirm(
+        `Deseja realmente excluir o professor ${nome}?`
+    );
+
+    if (!confirmar) return;
+
+    PROFESSORES = PROFESSORES.filter(
+        professor =>
+            normalizarTexto(professor) !== normalizarTexto(nome)
+    );
+
+    salvarProfessores();
+
+    renderizarCadastroProfessores();
+    atualizarDisponibilidade();
+
+    mostrarMensagemProfessor(
+        "Professor excluído com sucesso.",
+        "sucesso"
+    );
+}
+
+
+// Verifica se o professor está em alguma aula
+function verificarAulasDoProfessor(nome) {
+    for (const turma of TURMAS) {
+        for (let dia = 0; dia < 5; dia++) {
+            for (let aula = 0; aula < HORARIOS.length; aula++) {
+
+                const aulaAtual = obterAula(turma, dia, aula);
+
+                if (
+                    aulaAtual &&
+                    normalizarTexto(aulaAtual.professor) ===
+                    normalizarTexto(nome)
+                ) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+
+// Exibe mensagens do cadastro
+function mostrarMensagemProfessor(texto, tipo) {
+    mensagemProfessor.textContent = texto;
+    mensagemProfessor.className = `mensagem ${tipo}`;
+}
 // =====================================
 // INICIALIZAÇÃO
 // =====================================
